@@ -50,7 +50,7 @@
      ~@body))
 
 (defn parse-sentence
-  "Returns parsed sentence as a vector of maps, each map representing features of one morpheme."
+  "Returns parsed sentence as a vector of maps, each map representing the features of one morpheme."
   [s]
   (pop ; Discards EOS
    (loop [node (.getNext (.parseToNode ^Tagger *tagger* s))
