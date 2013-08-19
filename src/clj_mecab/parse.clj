@@ -15,8 +15,8 @@
      :dics (zipmap (map keyword dics) (map #(str dic-dir "/" %) dics))}))
 
 (def dictionary-features
-  {:ipadic [:pos1 :pos2 :pos3 :pos4 :cType :cForm :orthBase :kana :pron]
-   :unidic [:pos1 :pos2 :pos3 :pos4 :cType :cForm :lForm :lemma :orth :pron :orthBase :pronBase :goshu :iType :iForm :fType :fForm]
+  {:ipadic [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :orth-base :kana :pron]
+   :unidic [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :orth-base :pron-base :goshu :i-type :i-form :f-type :f-form]
    :unidic-MLJ [:TODO]})
 
 ;; Bind initial values for tagger and features to first dictionary type found.
