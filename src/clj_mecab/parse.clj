@@ -1,10 +1,13 @@
 (ns clj-mecab.parse
   (:require [clojure.string :as string]
             [clojure.java.io :as io]
-            [clojure.java.shell :as shell])
+            [clojure.java.shell :as shell]
+            [clojure.data.csv :as csv])
   (:import (org.chasen.mecab Tagger Node)))
 
 (clojure.lang.RT/loadLibrary "MeCab")
+
+;; ## Dictionary Auto-detection
 
 (def dictionary-info
   (let [dic-dir (-> (shell/sh "mecab-config" "--dicdir")
@@ -62,8 +65,19 @@
         (conj results
               (zipmap *features*
                       (-> (.getFeature node)
-                          string/trim-newline
-                          (string/split #",")))))))))
+                          csv/read-csv
+                          first))))))))
+
+(defn parse-sentence-raw
+  [s]
+  (pop ; Discards EOS
+   (loop [node (.getNext (.parseToNode ^Tagger *tagger* s))
+          results []]
+     (if-not node
+       results
+       (recur
+        (.getNext node)
+        (conj results (string/trim-newline (.getFeature node))))))))
 
 ;; FIXME: The surface in the .getSurface call is always empty, unless called a second time.
 ;;        Currently, this means that IPAdic output is broken (missing :orth).
