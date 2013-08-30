@@ -69,7 +69,7 @@ Include in :dependencies in your `project.clj`:
 (use 'clj-mecab.parse)
 (parse-sentence "こんにちは、世界！")
 
-[{:orth "こんにちは", :fType "*", :iType "*", ...} {:orth "、", :fType "*", :iType "*", ...} {:orth "世界", :fType "*", :iType "*", ...} ...]
+[{:orth "こんにちは", :f-type "*", :i-type "*", ...} {:orth "、", :f-type "*", :i-type "*", ...} {:orth "世界", :f-type "*", :i-type "*", ...} ...]
 ```
 
 ## BUGS
