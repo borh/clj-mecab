@@ -45,12 +45,15 @@
   Tries to guess the dictionary type and parse all features as keywords into a map."
   [dic-dir & body]
   `(binding [*tagger* (Tagger. (str "-d " ~dic-dir))
-             *features* (cond
-                         (re-seq #"(?i)ipadic" ~dic-dir) (get dictionary-features :ipadic)
-                         (re-seq #"(?i)(MLJ|kindai)" ~dic-dir) (get dictionary-features :unidic-MLJ)
-                         (re-seq #"(?i)unidic" ~dic-dir) (get dictionary-features :unidic)
-                         :else *features*)]
+             *features* (get dictionary-features
+                             (condp re-seq ~dic-dir
+                               #"(?i)ipadic" :ipadic
+                               #"(?i)(MLJ|kindai)" :unidic-MLJ
+                               #"(?i)unidic" :unidic)
+                             *features*)]
      ~@body))
+
+;; ## Parse Functions
 
 (defn parse-sentence
   "Returns parsed sentence as a vector of maps, each map representing the features of one morpheme."
