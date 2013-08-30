@@ -20,7 +20,7 @@
 (def dictionary-features
   {:ipadic [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :orth-base :kana :pron]
    :unidic [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :orth-base :pron-base :goshu :i-type :i-form :f-type :f-form]
-   :unidic-MLJ [:TODO]})
+   :unidic-MLJ [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]})
 
 ;; Bind initial values for tagger and features to first dictionary type found.
 (def ^:dynamic *tagger* (Tagger. (str "-d " (-> dictionary-info :dics first second))))
