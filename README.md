@@ -60,7 +60,7 @@ And at least one dictionary:
 Include in :dependencies in your `project.clj`:
 
 ```clojure
-[clj-mecab "0.1.0"]
+[clj-mecab "0.2.0"]
 ```
 
 ## Usage
