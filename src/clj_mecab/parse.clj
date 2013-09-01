@@ -34,12 +34,7 @@
   Parses all features as keywords into a map."
   [dic-type & body]
   `(binding [*tagger* (Tagger. (str "-d " (get-in dictionary-info [:dics ~dic-type])))
-             *features* (case ~dic-type
-                          :ipadic (get dictionary-features :ipadic)
-                          :unidic-MLJ (get dictionary-features :unidic-MLJ)
-                          :unidic-EMJ (get dictionary-features :unidic-EMJ)
-                          :unidic (get dictionary-features :unidic)
-                          :else *features*)]
+             *features* (get dictionary-features ~dic-type *features*)]
      ~@body))
 
 (defmacro with-dictionary-string
