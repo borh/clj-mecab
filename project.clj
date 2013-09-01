@@ -1,4 +1,4 @@
-(defproject clj-mecab "0.2.0"
+(defproject clj-mecab "0.3.0-SNAPSHOT"
   :description "Clojure wrapper for the Japanese Morphological Analyzer MeCab"
   :url "https://github.com/borh/clj-mecab"
   :licence {:name "Eclipse Public License"
