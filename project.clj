@@ -8,7 +8,7 @@
              {:name "BSD"
               :url "BSD"}]
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.chasen/mecab "0.996"]
+                 [org.clojars.borh/mecab "0.996"]
                  [org.clojure/data.csv "0.1.2"]]
   :jvm-opts ["-server"]
   :profiles {:dev {:dependencies [[criterium "0.4.2"]]}}
