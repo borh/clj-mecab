@@ -7,6 +7,8 @@
               :url "http://www.eclipse.org/legal/epl-v10.html"}
              {:name "BSD"
               :url "BSD"}]
+  :scm {:url "https://github.com/borh/clj-mecab.git"
+        :name "git"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojars.borh/mecab "0.996"]
                  [org.clojure/data.csv "0.1.2"]]
