@@ -73,15 +73,3 @@
                                 csv/read-csv
                                 first))
                   :orth (.surface node)))))))))
-
-
-;; Performance benchmarking
-(comment
-  (with-dictionary :unidic-MLJ (parse-sentence "こんにちは"))
-
-  (ns clj-mecab.parse)
-  (def x "助詞,係助詞,*,*,*,*,ハ,は,は,ワ,ハ,和,は,ワ,ハ,ハ,*,*,*,*,*,*,*,\"動詞%F2@0,名詞%F1,形容詞%F2@-1\",*")
-  (use 'criterium.core)
-  (bench (first (csv/read-csv x)))
-  (bench (first (csv2/parse-csv x)))
-  (bench (string/split x #",")))
