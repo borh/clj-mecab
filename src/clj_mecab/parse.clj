@@ -3,9 +3,8 @@
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.data.csv :as csv])
-  (:import (org.chasen.mecab Tagger Node)))
-
-(clojure.lang.RT/loadLibrary "MeCab")
+  (:import [net.moraleboost.mecab Lattice Node]
+           [net.moraleboost.mecab.impl StandardTagger]))
 
 ;; ## Dictionary Auto-detection
 
@@ -23,8 +22,8 @@
    :unidic-MLJ [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]
    :unidic-EMJ [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]})
 
-;; Bind initial values for tagger and features to first dictionary type found.
-(def ^:dynamic *tagger* (Tagger. (str "-d " (-> dictionary-info :dics first second))))
+;; Bind initial values for tagger and features to a random found dictionary type.
+(def ^:dynamic *tagger* (StandardTagger. (str "-d " (-> dictionary-info :dics first second))))
 (def ^:dynamic *features* (get dictionary-features (-> dictionary-info :dics first first)
                                ;; If a dictionary format is not in the map, use a generic one:
                                (conj (lazy-seq (for [field (partition 2 (interleave (repeat "feature-") (range)))] (keyword (apply str field)))) :orth)))
@@ -33,7 +32,7 @@
   "Evaluates body with MeCab's dictionary set to dic-type keyword.
   Parses all features as keywords into a map."
   [dic-type & body]
-  `(binding [*tagger* (Tagger. (str "-d " (get-in dictionary-info [:dics ~dic-type])))
+  `(binding [*tagger* (StandardTagger. (str "-d " (get-in dictionary-info [:dics ~dic-type])))
              *features* (get dictionary-features ~dic-type *features*)]
      ~@body))
 
@@ -41,7 +40,7 @@
   "Evaluates body with MeCab's dictionary set to dic-dir.
   Tries to guess the dictionary type and parse all features as keywords into a map."
   [dic-dir & body]
-  `(binding [*tagger* (Tagger. (str "-d " ~dic-dir))
+  `(binding [*tagger* (StandardTagger. (str "-d " ~dic-dir))
              *features* (get dictionary-features
                              (condp re-seq ~dic-dir
                                #"(?i)ipadic" :ipadic
@@ -56,36 +55,33 @@
 (defn parse-sentence
   "Returns parsed sentence as a vector of maps, each map representing the features of one morpheme."
   [s]
-  (pop ; Discards EOS
-   (loop [node (.getNext (.parseToNode ^Tagger *tagger* s))
-          results []]
-     (if-not node
-       results
-       (recur
-        (.getNext node)
-        (conj results
-              (zipmap *features*
-                      (-> (.getFeature node)
-                          csv/read-csv
-                          first))))))))
+  (let [^Lattice lattice (.createLattice ^StandardTagger *tagger*)
+        _ (.setSentence lattice s)
+        _ (.parse ^StandardTagger *tagger* lattice)]
+    (pop ; Discards EOS
+     (loop [node (-> lattice (.bosNode) (.next))
+            results []]
+       (if-not node
+         (do (.destroy lattice) ;; Prevent memory from leaking.
+             results)
+         (recur
+          (.next node)
+          (conj results
+                (assoc
+                    (zipmap *features*
+                            (-> (.feature node)
+                                csv/read-csv
+                                first))
+                  :orth (.surface node)))))))))
 
-(defn parse-sentence-raw
-  [s]
-  (pop ; Discards EOS
-   (loop [node (.getNext (.parseToNode ^Tagger *tagger* s))
-          results []]
-     (if-not node
-       results
-       (recur
-        (.getNext node)
-        (conj results (string/trim-newline (.getFeature node))))))))
 
-;; FIXME: The surface in the .getSurface call is always empty, unless called a second time.
-;;        Currently, this means that IPAdic output is broken (missing :orth).
+;; Performance benchmarking
 (comment
-  (conj results
-              (merge {:orth (.getSurface node)} ;; Some dictionaries do not have :orth in the feature vector
-                     (zipmap *features*
-                             (-> (.getFeature node)
-                                 string/trim-newline
-                                 (string/split #","))))))
+  (with-dictionary :unidic-MLJ (parse-sentence "こんにちは"))
+
+  (ns clj-mecab.parse)
+  (def x "助詞,係助詞,*,*,*,*,ハ,は,は,ワ,ハ,和,は,ワ,ハ,ハ,*,*,*,*,*,*,*,\"動詞%F2@0,名詞%F1,形容詞%F2@-1\",*")
+  (use 'criterium.core)
+  (bench (first (csv/read-csv x)))
+  (bench (first (csv2/parse-csv x)))
+  (bench (string/split x #",")))
