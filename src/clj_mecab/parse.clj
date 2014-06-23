@@ -70,9 +70,12 @@
          (recur
           (.next node)
           (conj results
-                (assoc
-                    (zipmap *features*
-                            (-> (.feature node)
-                                csv/read-csv
-                                first))
-                  :orth (.surface node)))))))))
+                (let [orth (.surface node)
+                      morpheme (->> (.feature node)
+                                    csv/read-csv
+                                    first
+                                    (zipmap *features*))]
+                  (-> morpheme
+                      (assoc :orth orth)
+                      (update-in [:lemma] #(or % orth))
+                      (update-in [:orth-base] #(or % orth)))))))))))
