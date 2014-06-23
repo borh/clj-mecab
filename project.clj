@@ -12,7 +12,8 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [com.nativelibs4java/bridj "0.6.2"]
                  [cmecab/cmecab "2.0.1"]
-                 [org.clojure/data.csv "0.1.2"]]
+                 [org.clojure/data.csv "0.1.2"]
+                 [prismatic/schema "0.2.4"]]
   :jvm-opts ["-server"]
   :profiles {:dev {:dependencies [[criterium "0.4.3"]]}}
   :main clj-mecab.parse)
