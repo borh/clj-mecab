@@ -2,7 +2,10 @@
   (:require [clojure.string :as string]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [clojure.data.csv :as csv])
+            [clojure.data.csv :as csv]
+
+            [schema.core :as s]
+            [schema.macros :as sm])
   (:import [net.moraleboost.mecab Lattice Node]
            [net.moraleboost.mecab.impl StandardTagger]))
 
@@ -52,9 +55,9 @@
 
 ;; ## Parse Functions
 
-(defn parse-sentence
+(sm/defn parse-sentence :- [{s/Keyword s/Str}]
   "Returns parsed sentence as a vector of maps, each map representing the features of one morpheme."
-  [s]
+  [s :- s/Str]
   (let [^Lattice lattice (.createLattice ^StandardTagger *tagger*)
         _ (.setSentence lattice s)
         _ (.parse ^StandardTagger *tagger* lattice)]
