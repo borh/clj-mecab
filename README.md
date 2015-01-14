@@ -72,6 +72,12 @@ Include in :dependencies in your `project.clj`:
 [{:orth "こんにちは", :f-type "*", :i-type "*", ...} {:orth "、", :f-type "*", :i-type "*", ...} {:orth "世界", :f-type "*", :i-type "*", ...} ...]
 ```
 
+## Roadmap
+
+Several fautures are planned for future versions:
+
+-   Better examples
+
 ## BUGS
 
 -   For some yet unknown reason, calling .getSurface on a Node object will not work (empty string) the first time, but will the second time.
@@ -79,6 +85,6 @@ Include in :dependencies in your `project.clj`:
 
 ## License
 
-Copyright © 2013 Bor Hodošček
+Copyright © 2013-2015 Bor Hodošček
 
 Distributed under the Eclipse Public License, the same as Clojure, as well as the 3-clause BSD license.
