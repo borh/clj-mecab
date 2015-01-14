@@ -60,10 +60,12 @@ And at least one dictionary:
 Include in :dependencies in your `project.clj`:
 
 ```clojure
-[clj-mecab "0.3.0"]
+[clj-mecab "0.4.1.1"]
 ```
 
 ## Usage
+
+`lein with-profile dev repl`
 
 ```clojure
 (use 'clj-mecab.parse)
@@ -74,7 +76,7 @@ Include in :dependencies in your `project.clj`:
 
 ## Roadmap
 
-Several fautures are planned for future versions:
+Several features are planned for future versions:
 
 -   Better examples
 
