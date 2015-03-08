@@ -4,8 +4,7 @@
             [clojure.java.shell :as shell]
             [clojure.data.csv :as csv]
 
-            [schema.core :as s]
-            [schema.macros :as sm])
+            [schema.core :as s])
   (:import [net.moraleboost.mecab Lattice Node]
            [net.moraleboost.mecab.impl StandardTagger]))
 
@@ -55,7 +54,7 @@
 
 ;; ## Parse Functions
 
-(sm/defn parse-sentence :- [{s/Keyword s/Str}]
+(s/defn parse-sentence :- [{s/Keyword s/Str}]
   "Returns parsed sentence as a vector of maps, each map representing the features of one morpheme."
   [s :- s/Str]
   (let [^Lattice lattice (.createLattice ^StandardTagger *tagger*)
