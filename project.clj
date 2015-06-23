@@ -9,11 +9,11 @@
               :url "BSD"}]
   :scm {:url "https://github.com/borh/clj-mecab.git"
         :name "git"}
-  :dependencies [[org.clojure/clojure "1.6.0"]
+  :dependencies [[org.clojure/clojure "1.7.0-RC2"]
                  [com.nativelibs4java/bridj "0.6.2"]
                  [cmecab/cmecab "2.0.1"]
                  [org.clojure/data.csv "0.1.2"]
-                 [prismatic/schema "0.4.0"]]
+                 [prismatic/schema "0.4.3"]]
   :jvm-opts ["-server"]
   :profiles {:dev {:dependencies [[criterium "0.4.3"]]}}
   :main clj-mecab.parse)
