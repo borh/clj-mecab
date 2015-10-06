@@ -13,7 +13,7 @@
                  [com.nativelibs4java/bridj "0.6.2"]
                  [cmecab/cmecab "2.0.1"]
                  [org.clojure/data.csv "0.1.3"]
-                 [prismatic/schema "1.0.0-alpha1"]]
+                 [prismatic/schema "1.0.1"]]
   :jvm-opts ["-server"]
   :profiles {:dev {:dependencies [[criterium "0.4.3"]]}}
   :main clj-mecab.parse)
