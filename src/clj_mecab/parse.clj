@@ -15,7 +15,7 @@
                     :out
                     string/trim-newline)
         dics (seq (.list (io/file dic-dir)))]
-    {:dic-dir dic-dir
+    {:dic-dir (if (.exists (io/file dic-dir)) dic-dir)
      :dics (zipmap (map keyword dics) (map #(str dic-dir "/" %) dics))}))
 
 (def dictionary-features
@@ -25,10 +25,10 @@
    :unidic-EMJ [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]})
 
 ;; Bind initial values for tagger and features to a random found dictionary type.
-(def ^:dynamic *tagger* (StandardTagger. (str "-d " (-> dictionary-info :dics first second))))
+(def ^:dynamic *tagger* (StandardTagger. (if (-> dictionary-info :dics seq) (str "-d " (-> dictionary-info :dics first second)) "")))
 (def ^:dynamic *features* (get dictionary-features (-> dictionary-info :dics first first)
                                ;; If a dictionary format is not in the map, use a generic one:
-                               (conj (lazy-seq (for [field (partition 2 (interleave (repeat "feature-") (range)))] (keyword (apply str field)))) :orth)))
+                               (conj (lazy-seq (for [field (partition 2 (interleave (repeat "feature-") (range)))] (keyword (string/join field)))) :orth)))
 
 (defmacro with-dictionary
   "Evaluates body with MeCab's dictionary set to dic-type keyword.
