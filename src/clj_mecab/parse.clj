@@ -14,8 +14,12 @@
   (let [dic-dir (-> (shell/sh "mecab-config" "--dicdir")
                     :out
                     string/trim-newline)
+        dic-dir (if (.exists (io/file dic-dir))
+                  dic-dir
+                  (-> "~/.mecabrc" slurp (re-seq #"dicdir = (.*)/.*dic/")))
         dics (seq (.list (io/file dic-dir)))]
-    {:dic-dir (if (.exists (io/file dic-dir)) dic-dir)
+    {:dic-dir (if (.exists (io/file dic-dir))
+                dic-dir)
      :dics (zipmap (map keyword dics) (map #(str dic-dir "/" %) dics))}))
 
 (def dictionary-features
