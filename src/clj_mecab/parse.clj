@@ -11,15 +11,17 @@
 ;; ## Dictionary Auto-detection
 
 (def dictionary-info
-  (let [dic-dir (-> (shell/sh "mecab-config" "--dicdir")
-                    :out
-                    string/trim-newline)
-        dic-dir (if (.exists (io/file dic-dir))
-                  dic-dir
-                  (-> "~/.mecabrc" slurp (re-seq #"dicdir = (.*)/.*dic/")))
+  (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
+                           :out
+                           string/trim-newline)
+        user-config (str (System/getProperty "user.home") "/.mecabrc")
+        user-dic-dir (if (.exists (io/file user-config))
+                       (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+dic/") first second))
+        dic-dir (if (.exists (io/file user-dic-dir))
+                            user-dic-dir
+                            system-dic-dir)
         dics (seq (.list (io/file dic-dir)))]
-    {:dic-dir (if (.exists (io/file dic-dir))
-                dic-dir)
+    {:dic-dir dic-dir
      :dics (zipmap (map keyword dics) (map #(str dic-dir "/" %) dics))}))
 
 (def dictionary-features
