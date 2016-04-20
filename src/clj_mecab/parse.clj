@@ -58,6 +58,14 @@
                              *features*)]
      ~@body))
 
+(defmacro with-dictionary-raw
+  "Evaluates body with MeCab's dictionary set to dic-type keyword.
+  Parses all features as keywords into a map."
+  [dic-type dic-path & body]
+  `(binding [*tagger* (StandardTagger. (str "-d " ~dic-path))
+             *features* (get dictionary-features ~dic-type *features*)]
+     ~@body))
+
 ;; ## Parse Functions
 
 (s/defn parse-sentence :- [{s/Keyword s/Str}]
