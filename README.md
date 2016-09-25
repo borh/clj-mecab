@@ -60,7 +60,7 @@ And at least one dictionary:
 Include in :dependencies in your `project.clj`:
 
 ```clojure
-[clj-mecab "0.4.1.1"]
+[clj-mecab "0.4.8"]
 ```
 
 ## Usage
@@ -83,10 +83,11 @@ Several features are planned for future versions:
 ## BUGS
 
 -   For some yet unknown reason, calling .getSurface on a Node object will not work (empty string) the first time, but will the second time.
-    Currently this means that :orth is not generated when using IPAdic.
+    Currently this means that :orth is not generated when using IPAdic. Probably same issue as taku910/mecab#26
+
 
 ## License
 
-Copyright © 2013-2015 Bor Hodošček
+Copyright © 2013-2016 Bor Hodošček
 
 Distributed under the Eclipse Public License, the same as Clojure, as well as the 3-clause BSD license.
