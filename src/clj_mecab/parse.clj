@@ -1,10 +1,9 @@
 (ns clj-mecab.parse
-  (:require [clojure.string :as string]
+  (:require [clojure.spec :as s]
+            [clojure.string :as string]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
-            [clojure.data.csv :as csv]
-
-            [schema.core :as s])
+            [clojure.data.csv :as csv])
   (:import [net.moraleboost.mecab Lattice Node]
            [net.moraleboost.mecab.impl StandardTagger]))
 
@@ -68,9 +67,9 @@
 
 ;; ## Parse Functions
 
-(s/defn parse-sentence :- [{s/Keyword s/Str}]
+(defn parse-sentence
   "Returns parsed sentence as a vector of maps, each map representing the features of one morpheme."
-  [s :- s/Str]
+  [s]
   (let [^Lattice lattice (.createLattice ^StandardTagger *tagger*)
         _ (.setSentence lattice s)
         _ (.parse ^StandardTagger *tagger* lattice)]
@@ -92,3 +91,7 @@
                       (assoc :orth orth)
                       (update-in [:lemma] #(or % orth))
                       (update-in [:orth-base] #(or % orth)))))))))))
+
+(s/fdef parse-sentence
+  :args (s/cat :s string?)
+  :ret (s/coll-of (s/map-of keyword? string?)))
