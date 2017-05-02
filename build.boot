@@ -1,9 +1,9 @@
 (def project 'clj-mecab)
-(def version "0.4.9")
+(def version "0.4.10")
 
 (set-env! :resource-paths #{"src"}
           :source-paths   #{"test"}
-          :dependencies   '[[org.clojure/clojure "1.9.0-alpha14"]
+          :dependencies   '[[org.clojure/clojure "1.9.0-alpha16"]
 
                             [adzerk/boot-test "RELEASE" :scope "test"]
                             [org.clojure/test.check "0.9.0" :scope "test"]
@@ -35,6 +35,6 @@
 
 (deftask dev
   []
-  (comp (watch) (build) (repl :server true)))
+  (comp (watch) (build) (repl :init-ns 'clj-mecab.parse :server true)))
 
 (require '[adzerk.boot-test :refer [test]])

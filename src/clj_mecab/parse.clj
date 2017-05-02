@@ -1,5 +1,5 @@
 (ns clj-mecab.parse
-  (:require [clojure.spec :as s]
+  (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
@@ -15,7 +15,7 @@
                            string/trim-newline)
         user-config (str (System/getProperty "user.home") "/.mecabrc")
         user-dic-dir (if (.exists (io/file user-config))
-                       (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+dic/") first second))
+                       (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+/") first second))
         dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
                   user-dic-dir
                   system-dic-dir)
@@ -23,8 +23,42 @@
     {:dic-dir dic-dir
      :dics (zipmap (map keyword dics) (map #(str dic-dir "/" %) dics))}))
 
+(s/def ::pos-1 string?)
+(s/def ::pos-2 string?)
+(s/def ::pos-3 string?)
+(s/def ::pos-4 string?)
+(s/def ::c-type string?)
+(s/def ::c-form string?)
+(s/def ::orth string?)
+(s/def ::orth-base string?)
+(s/def ::pron string?)
+
+(s/def ::l-form string?)
+(s/def ::lemma string?)
+(s/def ::kana string?)
+(s/def ::goshu string?)
+(s/def ::pron-base string?)
+(s/def ::kana-base string?)
+(s/def ::form-base string?)
+(s/def ::i-type string?)
+(s/def ::i-form string?)
+(s/def ::i-con-type string?)
+(s/def ::f-type string?)
+(s/def ::f-form string?)
+(s/def ::f-con-type string?)
+(s/def ::a-type string?)
+(s/def ::a-con-type string?)
+(s/def ::a-mod-type string?)
+;; (s/def :: string?)
+
+(s/def ::morpheme
+  (s/keys
+   :req [::pos-1 ::pos-2 ::pos-3 ::pos-4 ::c-type ::c-form ::orth ::orth-base ::pron]
+   :opt [::l-form ::lemma ::kana ::goshu ::pron-base ::kana-base ::form-base ::i-type ::i-form ::i-con-type ::f-type ::f-form ::f-con-type ::a-type ::a-con-type ::a-mod-type]))
+
 (def dictionary-features
   {:ipadic [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :orth-base :kana :pron]
+   :ipadic-utf8 [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :orth-base :kana :pron]
    :unidic [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :orth-base :pron-base :goshu :i-type :i-form :f-type :f-form]
    :unidic-MLJ [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]
    :unidic-EMJ [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]})
@@ -94,4 +128,4 @@
 
 (s/fdef parse-sentence
   :args (s/cat :s string?)
-  :ret (s/coll-of (s/map-of keyword? string?)))
+  :ret (s/coll-of ::morpheme))
