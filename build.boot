@@ -1,15 +1,15 @@
 (def project 'clj-mecab)
-(def version "0.4.10")
+(def version "0.4.11")
 
 (set-env! :resource-paths #{"src"}
           :source-paths   #{"test"}
-          :dependencies   '[[org.clojure/clojure "1.9.0-alpha16"]
+          :dependencies   '[[org.clojure/clojure "1.9.0-beta2"]
 
                             [adzerk/boot-test "RELEASE" :scope "test"]
-                            [org.clojure/test.check "0.9.0" :scope "test"]
+                            [org.clojure/test.check "0.10.0-alpha2" :scope "test"]
                             [adzerk/bootlaces "0.1.13" :scope "test"]
 
-                            [org.clojure/data.csv "0.1.3"]
+                            [org.clojure/data.csv "0.1.4"]
                             [com.nativelibs4java/bridj "0.7.0"]
                             [net.moraleboost.cmecab-java/cmecab-java "2.1.0"]])
 

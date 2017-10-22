@@ -52,6 +52,7 @@
              :pos-4 "*"
              :kana "カイセキ"
              :orth-base "解析"
+             :lemma "解析"
              :c-type "*"}
             {:orth "する"
              :c-form "基本形"
@@ -62,4 +63,5 @@
              :pos-4 "*"
              :kana "スル"
              :orth-base "する"
+             :lemma "する"
              :c-type "サ変・スル"}]))))

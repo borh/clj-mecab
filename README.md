@@ -19,6 +19,14 @@ mvn install:install-file -DgroupId=org.chasen -DartifactId=mecab -Dpackaging=jar
 
 Where `/usr/share/java/mecab/MeCab.jar` should point to the generated jar on your system.
 
+You will also need to manualy download [cmecab-java](https://github.com/takscape/cmecab-java) and install it into your local Maven repo:
+
+```bash
+wget https://github.com/takscape/cmecab-java/releases/download/2.1.0/cmecab-java-2.1.0.tar.gz
+tar xzf cmecab-java-2.1.0.tar.gz
+mvn install:install-file -DgroupId=net.moraleboost.cmecab-java -DartifactId=cmecab-java -Dpackaging=jar -Dversion=2.1.0 -Dfile=cmecab-java-2.1.0/cmecab-java-2.1.0.jar -DgeneratePom=true
+```
+
 ### Manually building and installing MeCab
 
 MeCab depends on [CRF++](http://crfpp.sourceforge.net/), so first install that.
@@ -60,7 +68,7 @@ And at least one dictionary:
 Include in :dependencies in your `project.clj`:
 
 ```clojure
-[clj-mecab "0.4.8"]
+[clj-mecab "0.4.11"]
 ```
 
 ## Usage
