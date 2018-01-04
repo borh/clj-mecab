@@ -1,9 +1,9 @@
 (def project 'clj-mecab)
-(def version "0.4.11")
+(def version "0.4.12")
 
 (set-env! :resource-paths #{"src"}
           :source-paths   #{"test"}
-          :dependencies   '[[org.clojure/clojure "1.9.0-beta2"]
+          :dependencies   '[[org.clojure/clojure "1.9.0" :scope "provided"]
 
                             [adzerk/boot-test "RELEASE" :scope "test"]
                             [org.clojure/test.check "0.10.0-alpha2" :scope "test"]
