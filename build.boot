@@ -56,7 +56,7 @@
 (deftask build
   "Build and install the project locally."
   []
-  (comp (pom) (jar) (target) (install)))
+  (comp (pom) (aot) (jar) (target) (install)))
 
 (deftask dev
   []
