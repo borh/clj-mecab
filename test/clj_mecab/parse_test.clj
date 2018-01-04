@@ -4,7 +4,7 @@
 
 (deftest parse-sentence-unidic-test
   (testing "Parsing with UniDic."
-    (is (= (with-dictionary :unidic (parse-sentence "解析する"))
+    (is (= (with-dictionary :unidic-cwj (parse-sentence "解析する"))
            [{:orth "解析"
              :f-type "*"
              :i-type "*"
@@ -21,7 +21,19 @@
              :l-form "カイセキ"
              :pron-base "カイセキ"
              :i-form "*"
-             :f-form "*"}
+             :f-form "*"
+             :a-con-type "C2",
+             :type "体",
+             :i-con-type "*",
+             :kana-base "カイセキ",
+             :lemma-id "5785",
+             :lid "1590177315299840",
+             :form-base "カイセキ",
+             :f-con-type "*",
+             :form "カイセキ",
+             :a-mod-type "*",
+             :a-type "0",
+             :kana "カイセキ"}
             {:orth "する"
              :f-type "*"
              :i-type "*"
@@ -38,7 +50,19 @@
              :l-form "スル"
              :pron-base "スル"
              :i-form "*"
-             :f-form "*"}]))))
+             :f-form "*"
+             :a-con-type "C5",
+             :type "用",
+             :i-con-type "*",
+             :kana-base "スル",
+             :lemma-id "19537",
+             :lid "5370298291593899",
+             :form-base "スル",
+             :f-con-type "*",
+             :form "スル",
+             :a-mod-type "*",
+             :a-type "0",
+             :kana "スル"}]))))
 
 (deftest parse-sentence-ipadic-test
   (testing "Parsing with IPAdic."
