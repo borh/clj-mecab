@@ -89,17 +89,28 @@
              *features* (get dictionary-features ~dic-type *features*)]
      ~@body))
 
+(defn guess-dictionary [s]
+  (condp re-seq s
+    #"(?i)ipadic" :ipadic
+    #"(?i)juman" :juman
+    #"(?i)(MLJ|kindai)" :unidic-kindai
+    #"(?i)(EMJ|kinsei)" :unidic-kinsei
+    #"(?i)unidic.*cwj" :unidic-cwj
+    #"(?i)unidic.*csj" :unidic-csj
+    #"(?i)unidic.*kyogen" :unidic-kyogen
+    #"(?i)unidic.*qkana" :unidic-qkana
+    #"(?i)unidic.*wakan" :unidic-wakan
+    #"(?i)unidic.*wabun" :unidic-wabun
+    #"(?i)unidic.*manyo" :unidic-manyo
+    #"(?i)unidic" :unidic-cwj))
+
 (defmacro with-dictionary-string
   "Evaluates body with MeCab's dictionary set to dic-dir.
   Tries to guess the dictionary type and parse all features as keywords into a map."
   [dic-dir & body]
   `(binding [*tagger* (StandardTagger. (str "-d " ~dic-dir))
              *features* (get dictionary-features
-                             (condp re-seq ~dic-dir
-                               #"(?i)ipadic" :ipadic
-                               #"(?i)MLJ" :unidic-MLJ
-                               #"(?i)(EMJ|CWJ)" :unidic-EMJ
-                               #"(?i)unidic" :unidic)
+                             (guess-dictionary ~dic-dir)
                              *features*)]
      ~@body))
 
