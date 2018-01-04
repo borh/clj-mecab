@@ -13,7 +13,7 @@
   (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
                            :out
                            string/trim-newline)
-        user-config (str (System/getProperty "user.home") "/.mecabrc")
+        user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
         user-dic-dir (if (.exists (io/file user-config))
                        (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+/") first second))
         dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
@@ -21,7 +21,8 @@
                   system-dic-dir)
         dics (seq (.list (io/file dic-dir)))]
     {:dic-dir dic-dir
-     :dics (zipmap (map keyword dics) (map #(str dic-dir "/" %) dics))}))
+     :default-dic :unidic-cwj
+     :dics (zipmap (map keyword dics) (map #(str (io/file dic-dir %)) dics))}))
 
 (s/def ::pos-1 string?)
 (s/def ::pos-2 string?)
