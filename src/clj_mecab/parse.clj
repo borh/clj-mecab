@@ -30,43 +30,54 @@
 (s/def ::pos-4 string?)
 (s/def ::c-type string?)
 (s/def ::c-form string?)
-(s/def ::orth string?)
-(s/def ::orth-base string?)
-(s/def ::pron string?)
-
 (s/def ::l-form string?)
 (s/def ::lemma string?)
-(s/def ::kana string?)
-(s/def ::goshu string?)
+(s/def ::orth string?)
+(s/def ::pron string?)
+(s/def ::orth-base string?)
 (s/def ::pron-base string?)
-(s/def ::kana-base string?)
-(s/def ::form-base string?)
+(s/def ::goshu string?)
 (s/def ::i-type string?)
 (s/def ::i-form string?)
-(s/def ::i-con-type string?)
 (s/def ::f-type string?)
 (s/def ::f-form string?)
+(s/def ::i-con-type string?)
 (s/def ::f-con-type string?)
+(s/def ::type string?)
+(s/def ::kana string?)
+(s/def ::kana-base string?)
+(s/def ::form string?)
+(s/def ::form-base string?)
 (s/def ::a-type string?)
 (s/def ::a-con-type string?)
 (s/def ::a-mod-type string?)
-;; (s/def :: string?)
+(s/def ::lid string?)
+(s/def ::lemma-id string?)
 
 (s/def ::morpheme
   (s/keys
    :req [::pos-1 ::pos-2 ::pos-3 ::pos-4 ::c-type ::c-form ::orth ::orth-base ::pron]
-   :opt [::l-form ::lemma ::kana ::goshu ::pron-base ::kana-base ::form-base ::i-type ::i-form ::i-con-type ::f-type ::f-form ::f-con-type ::a-type ::a-con-type ::a-mod-type]))
+   :opt [::l-form ::lemma ::kana ::goshu ::pron-base ::kana-base ::form ::form-base ::i-type ::i-form ::i-con-type ::f-type ::f-form ::f-con-type ::type ::a-type ::a-con-type ::a-mod-type ::lid ::lemma-id]))
 
-(def dictionary-features
-  {:ipadic [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :orth-base :kana :pron]
-   :ipadic-utf8 [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :orth-base :kana :pron]
-   :unidic [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :orth-base :pron-base :goshu :i-type :i-form :f-type :f-form]
-   :unidic-MLJ [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]
-   :unidic-EMJ [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]})
+(let [ipadic-features [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :orth-base :kana :pron]
+      unidic-21-features [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]
+      unidic-22-features [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :orth-base :pron-base :goshu :i-type :i-form :f-type :f-form :i-con-type :f-con-type :type :kana :kana-base :form :form-base :a-type :a-con-type :a-mod-type :lid :lemma-id]]
+  (def dictionary-features
+    {:ipadic ipadic-features
+     :ipadic-utf8 ipadic-features
+     :unidic-cwj unidic-22-features
+     :unidic-csj unidic-22-features
+     :unidic-kindai unidic-21-features
+     :unidic-kyogen unidic-21-features
+     :unidic-kinsei unidic-21-features
+     :unidic-qkana unidic-21-features
+     :unidic-wakan unidic-21-features
+     :unidic-wabun unidic-21-features
+     :unidic-manyo unidic-21-features}))
 
 ;; Bind initial values for tagger and features to a random found dictionary type.
 (def ^:dynamic *tagger* (StandardTagger. (if (-> dictionary-info :dics seq) (str "-d " (-> dictionary-info :dics first second)) "")))
-(def ^:dynamic *features* (get dictionary-features (-> dictionary-info :dics first first)
+(def ^:dynamic *features* (get dictionary-features (-> dictionary-info :default-dic)
                                ;; If a dictionary format is not in the map, use a generic one:
                                (conj (lazy-seq (for [field (partition 2 (interleave (repeat "feature-") (range)))] (keyword (string/join field)))) :orth)))
 
