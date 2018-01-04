@@ -46,7 +46,7 @@
                     "BSD"
                     "BSD"}}
  aot {:namespace #{'clj-mecab.parse}}
- jar {:main 'clj-mecab.parse :file (str project "-" version "-app.jar")}
+ jar {:main 'clj-mecab.parse :file (str project "-" version ".jar")}
  target {:dir #{"target"}})
 
 (require '[adzerk.bootlaces :refer :all])
