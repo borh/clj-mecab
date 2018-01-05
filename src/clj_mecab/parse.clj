@@ -9,20 +9,49 @@
 
 ;; ## Dictionary Auto-detection
 
-(def dictionary-info
-  (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
-                           :out
-                           string/trim-newline)
-        user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
-        user-dic-dir (if (.exists (io/file user-config))
-                       (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+/") first second))
-        dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
-                  user-dic-dir
-                  system-dic-dir)
-        dics (seq (.list (io/file dic-dir)))]
-    {:dic-dir dic-dir
-     :default-dic :unidic-cwj
-     :dics (zipmap (map keyword dics) (map #(str (io/file dic-dir %)) dics))}))
+(s/def ::dictionary
+  #{:ipadic :jumandic :unidic :unidic-neologd :unidic-cwj :unidic-csj :unidic-kindai
+    :unidic-kyogen :unidic-kinsei :unidic-qkana :unidic-wakan :unidic-wabun :unidic-manyo})
+(s/def :dictionary/dir (s/and string? #(.exists (io/file %))))
+(s/def :dictionary/default ::dictionary)
+(s/def :dictionaries/path :dictionary/dir)
+(s/def :dictionaries/dirs (s/map-of ::dictionary :dictionary/dir))
+(s/def :dictionaries/info
+  (s/keys :req [:dictionaries/path :dictionary/default :dictionaries/dirs]))
+
+(defn guess-dictionary [s]
+  (condp re-seq s
+    #"(?i)ipadic" :ipadic
+    #"(?i)juman" :juman
+    #"(?i)unidic.*neologd.*" :unidic-neologd
+    #"(?i)(MLJ|kindai)" :unidic-kindai
+    #"(?i)(EMJ|kinsei)" :unidic-kinsei
+    #"(?i)unidic.*cwj" :unidic-cwj
+    #"(?i)unidic.*csj" :unidic-csj
+    #"(?i)unidic.*kyogen" :unidic-kyogen
+    #"(?i)unidic.*qkana" :unidic-qkana
+    #"(?i)unidic.*wakan" :unidic-wakan
+    #"(?i)unidic.*wabun" :unidic-wabun
+    #"(?i)unidic.*manyo" :unidic-manyo
+    #"(?i)unidic" :unidic))
+
+(def dictionaries-info
+  (s/conform
+   :dictionaries/info
+   (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
+                            :out
+                            string/trim-newline)
+         user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
+         user-dic-dir (if (.exists (io/file user-config))
+                        (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+/") first second))
+         dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
+                   user-dic-dir
+                   system-dic-dir)
+         dics (seq (.list (io/file dic-dir)))]
+     {:dictionary/default :unidic-cwj
+      :dictionaries/path dic-dir
+      :dictionaries/dirs (zipmap (map (comp keyword guess-dictionary) dics)
+                                 (map #(str (io/file dic-dir %)) dics))})))
 
 (s/def ::pos-1 string?)
 (s/def ::pos-2 string?)
@@ -64,7 +93,6 @@
       unidic-22-features [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :orth-base :pron-base :goshu :i-type :i-form :f-type :f-form :i-con-type :f-con-type :type :kana :kana-base :form :form-base :a-type :a-con-type :a-mod-type :lid :lemma-id]]
   (def dictionary-features
     {:ipadic ipadic-features
-     :ipadic-utf8 ipadic-features
      :unidic-cwj unidic-22-features
      :unidic-csj unidic-22-features
      :unidic-kindai unidic-21-features
@@ -76,33 +104,29 @@
      :unidic-manyo unidic-21-features}))
 
 ;; Bind initial values for tagger and features to a random found dictionary type.
-(def ^:dynamic *tagger* (StandardTagger. (if (-> dictionary-info :dics seq) (str "-d " (-> dictionary-info :dics first second)) "")))
-(def ^:dynamic *features* (get dictionary-features (-> dictionary-info :default-dic)
-                               ;; If a dictionary format is not in the map, use a generic one:
-                               (conj (lazy-seq (for [field (partition 2 (interleave (repeat "feature-") (range)))] (keyword (string/join field)))) :orth)))
+(def ^:dynamic *tagger*
+  (StandardTagger. (if (-> dictionaries-info :dictionaries/dirs seq)
+                     (str "-d " (get-in dictionaries-info
+                                        [:dictionaries/dirs
+                                         (:dictionary/default dictionaries-info)] ))
+                     "")))
+(def ^:dynamic *features*
+  (get dictionary-features (:dictionary/default dictionaries-info)
+       ;; If a dictionary format is not in the map, use a generic one:
+       (conj (lazy-seq
+              (for [field (partition 2 (interleave (repeat "feature-") (range)))]
+                (keyword (string/join field))))
+             :orth)))
 
 (defmacro with-dictionary
   "Evaluates body with MeCab's dictionary set to dic-type keyword.
   Parses all features as keywords into a map."
   [dic-type & body]
-  `(binding [*tagger* (StandardTagger. (str "-d " (get-in dictionary-info [:dics ~dic-type])))
+  `(binding [*tagger* (StandardTagger.
+                       (str "-d "
+                            (get-in dictionaries-info [:dictionaries/dirs ~dic-type])))
              *features* (get dictionary-features ~dic-type *features*)]
      ~@body))
-
-(defn guess-dictionary [s]
-  (condp re-seq s
-    #"(?i)ipadic" :ipadic
-    #"(?i)juman" :juman
-    #"(?i)(MLJ|kindai)" :unidic-kindai
-    #"(?i)(EMJ|kinsei)" :unidic-kinsei
-    #"(?i)unidic.*cwj" :unidic-cwj
-    #"(?i)unidic.*csj" :unidic-csj
-    #"(?i)unidic.*kyogen" :unidic-kyogen
-    #"(?i)unidic.*qkana" :unidic-qkana
-    #"(?i)unidic.*wakan" :unidic-wakan
-    #"(?i)unidic.*wabun" :unidic-wabun
-    #"(?i)unidic.*manyo" :unidic-manyo
-    #"(?i)unidic" :unidic-cwj))
 
 (defmacro with-dictionary-string
   "Evaluates body with MeCab's dictionary set to dic-dir.
@@ -149,6 +173,6 @@
                       (update-in [:lemma] #(or % orth))
                       (update-in [:orth-base] #(or % orth)))))))))))
 
-(s/fdef parse-sentence
+(s/fdef ::parse-sentence
   :args (s/cat :s string?)
   :ret (s/coll-of ::morpheme))

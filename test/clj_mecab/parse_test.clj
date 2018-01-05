@@ -1,5 +1,6 @@
 (ns clj-mecab.parse-test
   (:require [clojure.test :refer :all]
+            [clojure.spec.alpha :as s]
             [clj-mecab.parse :refer :all]))
 
 (deftest parse-sentence-unidic-test
@@ -89,3 +90,8 @@
              :orth-base "する"
              :lemma "する"
              :c-type "サ変・スル"}]))))
+
+(deftest spec-test
+  (testing "Sentence parsing spec including OOV."
+    (s/valid? :clj-mecab.parse/parse-sentence
+              (parse-sentence "解析する❥．"))))
