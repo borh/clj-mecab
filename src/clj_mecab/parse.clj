@@ -9,13 +9,13 @@
 
 ;; ## Dictionary Auto-detection
 
-(s/def ::dictionary
+(s/def :mecab/dictionary
   #{:ipadic :jumandic :unidic :unidic-neologd :unidic-cwj :unidic-csj :unidic-kindai
     :unidic-kyogen :unidic-kinsei :unidic-qkana :unidic-wakan :unidic-wabun :unidic-manyo})
 (s/def :dictionary/dir (s/and string? #(.exists (io/file %))))
-(s/def :dictionary/default ::dictionary)
+(s/def :dictionary/default :mecab/dictionary)
 (s/def :dictionaries/path :dictionary/dir)
-(s/def :dictionaries/dirs (s/map-of ::dictionary :dictionary/dir))
+(s/def :dictionaries/dirs (s/map-of :mecab/dictionary :dictionary/dir))
 (s/def :dictionaries/info
   (s/keys :req [:dictionaries/path :dictionary/default :dictionaries/dirs]))
 
@@ -53,44 +53,45 @@
       :dictionaries/dirs (zipmap (map (comp keyword guess-dictionary) dics)
                                  (map #(str (io/file dic-dir %)) dics))})))
 
-(s/def ::pos-1 string?)
-(s/def ::pos-2 string?)
-(s/def ::pos-3 string?)
-(s/def ::pos-4 string?)
-(s/def ::c-type string?)
-(s/def ::c-form string?)
-(s/def ::l-form string?)
-(s/def ::lemma string?)
-(s/def ::orth string?)
-(s/def ::pron string?)
-(s/def ::orth-base string?)
-(s/def ::pron-base string?)
-(s/def ::goshu string?)
-(s/def ::i-type string?)
-(s/def ::i-form string?)
-(s/def ::f-type string?)
-(s/def ::f-form string?)
-(s/def ::i-con-type string?)
-(s/def ::f-con-type string?)
-(s/def ::type string?)
-(s/def ::kana string?)
-(s/def ::kana-base string?)
-(s/def ::form string?)
-(s/def ::form-base string?)
-(s/def ::a-type string?)
-(s/def ::a-con-type string?)
-(s/def ::a-mod-type string?)
-(s/def ::lid string?)
-(s/def ::lemma-id string?)
+(s/def :mecab.features/pos-1 string?)
+(s/def :mecab.features/pos-2 string?)
+(s/def :mecab.features/pos-3 string?)
+(s/def :mecab.features/pos-4 string?)
+(s/def :mecab.features/c-type string?)
+(s/def :mecab.features/c-form string?)
+(s/def :mecab.features/l-form string?)
+(s/def :mecab.features/lemma string?)
+(s/def :mecab.features/orth string?)
+(s/def :mecab.features/pron string?)
+(s/def :mecab.features/orth-base string?)
+(s/def :mecab.features/pron-base string?)
+(s/def :mecab.features/goshu string?)
+(s/def :mecab.features/i-type string?)
+(s/def :mecab.features/i-form string?)
+(s/def :mecab.features/f-type string?)
+(s/def :mecab.features/f-form string?)
+(s/def :mecab.features/i-con-type string?)
+(s/def :mecab.features/f-con-type string?)
+(s/def :mecab.features/type string?)
+(s/def :mecab.features/kana string?)
+(s/def :mecab.features/kana-base string?)
+(s/def :mecab.features/form string?)
+(s/def :mecab.features/form-base string?)
+(s/def :mecab.features/a-type string?)
+(s/def :mecab.features/a-con-type string?)
+(s/def :mecab.features/a-mod-type string?)
+(s/def :mecab.features/lid string?)
+(s/def :mecab.features/lemma-id string?)
+(s/def :mecab.features/position int?)
 
-(s/def ::morpheme
+(s/def :mecab/morpheme
   (s/keys
-   :req [::pos-1 ::pos-2 ::pos-3 ::pos-4 ::c-type ::c-form ::orth ::orth-base ::pron]
-   :opt [::l-form ::lemma ::kana ::goshu ::pron-base ::kana-base ::form ::form-base ::i-type ::i-form ::i-con-type ::f-type ::f-form ::f-con-type ::type ::a-type ::a-con-type ::a-mod-type ::lid ::lemma-id]))
+   :req [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/orth :mecab.features/orth-base :mecab.features/pron]
+   :opt [:mecab.features/l-form :mecab.features/lemma :mecab.features/kana :mecab.features/goshu :mecab.features/pron-base :mecab.features/kana-base :mecab.features/form :mecab.features/form-base :mecab.features/i-type :mecab.features/i-form :mecab.features/i-con-type :mecab.features/f-type :mecab.features/f-form :mecab.features/f-con-type :mecab.features/type :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type :mecab.features/lid :mecab.features/lemma-id :mecab.features/position]))
 
-(let [ipadic-features [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :orth-base :kana :pron]
-      unidic-21-features [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :kana :goshu :orth-base :pron-base :kana-base :form-base :i-type :i-form :i-con-type :f-type :f-form :f-con-type :a-type :a-con-type :a-mod-type]
-      unidic-22-features [:pos-1 :pos-2 :pos-3 :pos-4 :c-type :c-form :l-form :lemma :orth :pron :orth-base :pron-base :goshu :i-type :i-form :f-type :f-form :i-con-type :f-con-type :type :kana :kana-base :form :form-base :a-type :a-con-type :a-mod-type :lid :lemma-id]]
+(let [ipadic-features [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/orth-base :mecab.features/kana :mecab.features/pron]
+      unidic-21-features [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/l-form :mecab.features/lemma :mecab.features/orth :mecab.features/pron :mecab.features/kana :mecab.features/goshu :mecab.features/orth-base :mecab.features/pron-base :mecab.features/kana-base :mecab.features/form-base :mecab.features/i-type :mecab.features/i-form :mecab.features/i-con-type :mecab.features/f-type :mecab.features/f-form :mecab.features/f-con-type :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type]
+      unidic-22-features [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/l-form :mecab.features/lemma :mecab.features/orth :mecab.features/pron :mecab.features/orth-base :mecab.features/pron-base :mecab.features/goshu :mecab.features/i-type :mecab.features/i-form :mecab.features/f-type :mecab.features/f-form :mecab.features/i-con-type :mecab.features/f-con-type :mecab.features/type :mecab.features/kana :mecab.features/kana-base :mecab.features/form :mecab.features/form-base :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type :mecab.features/lid :mecab.features/lemma-id]]
   (def dictionary-features
     {:ipadic ipadic-features
      :unidic-cwj unidic-22-features
@@ -169,10 +170,10 @@
                                     first
                                     (zipmap *features*))]
                   (-> morpheme
-                      (assoc :orth orth)
-                      (update-in [:lemma] #(or % orth))
-                      (update-in [:orth-base] #(or % orth)))))))))))
+                      (assoc :mecab.features/orth orth)
+                      (update-in [:mecab.features/lemma] #(or % orth))
+                      (update-in [:mecab.features/orth-base] #(or % orth)))))))))))
 
 (s/fdef ::parse-sentence
   :args (s/cat :s string?)
-  :ret (s/coll-of ::morpheme))
+  :ret (s/coll-of :mecab/morpheme))
