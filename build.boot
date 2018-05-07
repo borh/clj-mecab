@@ -45,7 +45,6 @@
                     "http://www.eclipse.org/legal/epl-v10.html"
                     "BSD"
                     "BSD"}}
- aot {:namespace #{'clj-mecab.parse}}
  jar {:main 'clj-mecab.parse :file (str project "-" version ".jar")}
  target {:dir #{"target"}})
 
