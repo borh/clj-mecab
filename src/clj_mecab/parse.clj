@@ -7,7 +7,7 @@
   (:import [net.moraleboost.mecab Lattice Node]
            [net.moraleboost.mecab.impl StandardTagger]))
 
-;; ## Dictionary Auto-detection
+;; ## Dictionary auto-detection
 
 (s/def :mecab/dictionary
   #{:ipadic :jumandic :unidic :unidic-neologd :unidic-cwj :unidic-csj :unidic-kindai
@@ -104,6 +104,8 @@
      :unidic-wabun unidic-21-features
      :unidic-manyo unidic-21-features}))
 
+;; ## Tagger wrappers
+
 ;; Bind initial values for tagger and features to a random found dictionary type.
 (def ^:dynamic *tagger*
   (StandardTagger. (if (-> dictionaries-info :dictionaries/dirs seq)
@@ -147,7 +149,7 @@
              *features* (get dictionary-features ~dic-type *features*)]
      ~@body))
 
-;; ## Parse Functions
+;; ## Parse functions
 
 (defn parse-sentence
   "Returns parsed sentence as a vector of maps, each map representing the features of one morpheme."
