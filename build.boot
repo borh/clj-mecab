@@ -25,15 +25,11 @@
 
 (set-env! :resource-paths #{"src"}
           :source-paths   #{"test"}
-          :dependencies   '[[org.clojure/clojure "1.9.0" :scope "provided"]
+          :dependencies   '[[org.clojure/clojure "1.10.0-alpha4" :scope "provided"]
 
-                            [adzerk/boot-test "RELEASE" :scope "test"]
-                            [org.clojure/test.check "0.10.0-alpha2" :scope "test"]
+                            [seancorfield/boot-tools-deps "0.4.5" :scope "test"]
                             [adzerk/bootlaces "0.1.13" :scope "test"]
-
-                            [org.clojure/data.csv "0.1.4"]
-                            [com.nativelibs4java/bridj "0.7.0"]
-                            [net.moraleboost.cmecab-java/cmecab-java "2.1.0"]])
+                            [adzerk/boot-test "RELEASE" :scope "test"]])
 
 (task-options!
  pom {:project     (symbol project)
@@ -48,17 +44,18 @@
  jar {:main 'clj-mecab.parse :file (str project "-" version ".jar")}
  target {:dir #{"target"}})
 
+(require '[boot-tools-deps.core :refer [deps]])
 (require '[adzerk.bootlaces :refer :all])
 
 (bootlaces! version)
 
-(deftask build
-  "Build and install the project locally."
-  []
-  (comp (pom) (jar) (target) (install)))
+(deftask build []
+  (comp (deps) (pom) (jar) (target) (install)))
 
-(deftask dev
-  []
-  (comp (watch) (build) (repl :init-ns 'clj-mecab.parse :server true)))
+(deftask dev []
+  (comp (watch) (deps :aliases [:test]) (repl :init-ns 'clj-mecab.parse :server true) (pom) (jar) (target)))
 
-(require '[adzerk.boot-test :refer [test]])
+(require '[adzerk.boot-test :as boot-test])
+(deftask test []
+  (comp (deps :aliases [:test] :quick-merge true)
+        (boot-test/test)))

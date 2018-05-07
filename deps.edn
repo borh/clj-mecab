@@ -1,0 +1,6 @@
+{:deps
+ {org.clojure/data.csv {:mvn/version "0.1.4"}
+  com.nativelibs4java/bridj {:mvn/version "0.7.0"}
+  net.moraleboost.cmecab-java/cmecab-java {:mvn/version "2.1.0"}}
+ :aliases {:test {:extra-paths ["test"]
+                  :extra-deps {org.clojure/test.check {:mvn/version "0.10.0-alpha2"}}}}}
