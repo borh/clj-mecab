@@ -53,6 +53,9 @@
       :dictionaries/dirs (zipmap (map (comp keyword guess-dictionary) dics)
                                  (map #(str (io/file dic-dir %)) dics))})))
 
+(def valid-dictionaries
+  (set (keys (:dictionaries/dirs dictionaries-info))))
+
 (s/def :mecab.features/pos-1 string?)
 (s/def :mecab.features/pos-2 string?)
 (s/def :mecab.features/pos-3 string?)
