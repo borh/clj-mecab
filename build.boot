@@ -50,10 +50,10 @@
 (bootlaces! version)
 
 (deftask build []
-  (comp (deps) (pom) (jar) (target) (install)))
+  (comp (deps :quick-merge true) (pom) (jar) (target) (install)))
 
 (deftask dev []
-  (comp (watch) (deps :aliases [:test]) (repl :init-ns 'clj-mecab.parse :server true) (pom) (jar) (target)))
+  (comp (watch) (deps :aliases [:test]) (repl :init-ns 'clj-mecab.parse :server true)))
 
 (require '[adzerk.boot-test :as boot-test])
 (deftask test []
