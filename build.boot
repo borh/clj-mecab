@@ -25,7 +25,7 @@
 
 (set-env! :resource-paths #{"src"}
           :source-paths   #{"test"}
-          :dependencies   '[[org.clojure/clojure "1.10.0-alpha4" :scope "provided"]
+          :dependencies   '[[org.clojure/clojure "1.10.1" :scope "provided"]
 
                             [seancorfield/boot-tools-deps "0.4.5" :scope "test"]
                             [adzerk/bootlaces "0.1.13" :scope "test"]
