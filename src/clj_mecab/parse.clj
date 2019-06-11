@@ -33,7 +33,9 @@
     #"(?i)unidic.*wakan" :unidic-wakan
     #"(?i)unidic.*wabun" :unidic-wabun
     #"(?i)unidic.*manyo" :unidic-manyo
-    #"(?i)unidic" :unidic))
+    #"(?i)unidic" :unidic
+    ;; Fallback to UniDic if not autodetected, though this might be wrong.
+    :unidic))
 
 (def dictionaries-info
   (s/conform
