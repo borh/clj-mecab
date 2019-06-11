@@ -37,21 +37,21 @@
 
 (def dictionaries-info
   (s/conform
-   :dictionaries/info
-   (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
-                            :out
-                            string/trim-newline)
-         user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
-         user-dic-dir (if (.exists (io/file user-config))
-                        (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+/") first second))
-         dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
-                   user-dic-dir
-                   system-dic-dir)
-         dics (seq (.list (io/file dic-dir)))]
-     {:dictionary/default :unidic-cwj
-      :dictionaries/path dic-dir
-      :dictionaries/dirs (zipmap (map (comp keyword guess-dictionary) dics)
-                                 (map #(str (io/file dic-dir %)) dics))})))
+    :dictionaries/info
+    (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
+                             :out
+                             string/trim-newline)
+          user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
+          user-dic-dir (if (.exists (io/file user-config))
+                         (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+/") first second))
+          dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
+                    user-dic-dir
+                    system-dic-dir)
+          dics (seq (.list (io/file dic-dir)))]
+      {:dictionary/default :unidic-cwj
+       :dictionaries/path  dic-dir
+       :dictionaries/dirs  (zipmap (map (comp keyword guess-dictionary) dics)
+                                   (map #(str (io/file dic-dir %)) dics))})))
 
 (def valid-dictionaries
   (set (keys (:dictionaries/dirs dictionaries-info))))
@@ -89,23 +89,23 @@
 
 (s/def :mecab/morpheme
   (s/keys
-   :req [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/orth :mecab.features/orth-base :mecab.features/pron]
-   :opt [:mecab.features/l-form :mecab.features/lemma :mecab.features/kana :mecab.features/goshu :mecab.features/pron-base :mecab.features/kana-base :mecab.features/form :mecab.features/form-base :mecab.features/i-type :mecab.features/i-form :mecab.features/i-con-type :mecab.features/f-type :mecab.features/f-form :mecab.features/f-con-type :mecab.features/type :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type :mecab.features/lid :mecab.features/lemma-id :mecab.features/position]))
+    :req [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/orth :mecab.features/orth-base :mecab.features/pron]
+    :opt [:mecab.features/l-form :mecab.features/lemma :mecab.features/kana :mecab.features/goshu :mecab.features/pron-base :mecab.features/kana-base :mecab.features/form :mecab.features/form-base :mecab.features/i-type :mecab.features/i-form :mecab.features/i-con-type :mecab.features/f-type :mecab.features/f-form :mecab.features/f-con-type :mecab.features/type :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type :mecab.features/lid :mecab.features/lemma-id :mecab.features/position]))
 
 (let [ipadic-features [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/orth-base :mecab.features/kana :mecab.features/pron]
       unidic-21-features [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/l-form :mecab.features/lemma :mecab.features/orth :mecab.features/pron :mecab.features/kana :mecab.features/goshu :mecab.features/orth-base :mecab.features/pron-base :mecab.features/kana-base :mecab.features/form-base :mecab.features/i-type :mecab.features/i-form :mecab.features/i-con-type :mecab.features/f-type :mecab.features/f-form :mecab.features/f-con-type :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type]
       unidic-22-features [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/l-form :mecab.features/lemma :mecab.features/orth :mecab.features/pron :mecab.features/orth-base :mecab.features/pron-base :mecab.features/goshu :mecab.features/i-type :mecab.features/i-form :mecab.features/f-type :mecab.features/f-form :mecab.features/i-con-type :mecab.features/f-con-type :mecab.features/type :mecab.features/kana :mecab.features/kana-base :mecab.features/form :mecab.features/form-base :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type :mecab.features/lid :mecab.features/lemma-id]]
   (def dictionary-features
-    {:ipadic ipadic-features
-     :unidic-cwj unidic-22-features
-     :unidic-csj unidic-22-features
+    {:ipadic        ipadic-features
+     :unidic-cwj    unidic-22-features
+     :unidic-csj    unidic-22-features
      :unidic-kindai unidic-21-features
      :unidic-kyogen unidic-21-features
      :unidic-kinsei unidic-21-features
-     :unidic-qkana unidic-21-features
-     :unidic-wakan unidic-21-features
-     :unidic-wabun unidic-21-features
-     :unidic-manyo unidic-21-features}))
+     :unidic-qkana  unidic-21-features
+     :unidic-wakan  unidic-21-features
+     :unidic-wabun  unidic-21-features
+     :unidic-manyo  unidic-21-features}))
 
 ;; ## Tagger wrappers
 
@@ -114,14 +114,14 @@
   (StandardTagger. (if (-> dictionaries-info :dictionaries/dirs seq)
                      (str "-d " (get-in dictionaries-info
                                         [:dictionaries/dirs
-                                         (:dictionary/default dictionaries-info)] ))
+                                         (:dictionary/default dictionaries-info)]))
                      "")))
 (def ^:dynamic *features*
   (get dictionary-features (:dictionary/default dictionaries-info)
        ;; If a dictionary format is not in the map, use a generic one:
        (conj (lazy-seq
-              (for [field (partition 2 (interleave (repeat "feature-") (range)))]
-                (keyword (string/join field))))
+               (for [field (partition 2 (interleave (repeat "feature-") (range)))]
+                 (keyword (string/join field))))
              :orth)))
 
 (defmacro with-dictionary
@@ -129,8 +129,8 @@
   Parses all features as keywords into a map."
   [dic-type & body]
   `(binding [*tagger* (StandardTagger.
-                       (str "-d "
-                            (get-in dictionaries-info [:dictionaries/dirs ~dic-type])))
+                        (str "-d "
+                             (get-in dictionaries-info [:dictionaries/dirs ~dic-type])))
              *features* (get dictionary-features ~dic-type *features*)]
      ~@body))
 
@@ -160,24 +160,24 @@
   (let [^Lattice lattice (.createLattice ^StandardTagger *tagger*)
         _ (.setSentence lattice s)
         _ (.parse ^StandardTagger *tagger* lattice)]
-    (pop ; Discards EOS
-     (loop [node (-> lattice (.bosNode) (.next))
-            results []]
-       (if-not node
-         (do (.destroy lattice) ;; Prevent memory from leaking.
-             results)
-         (recur
-          (.next node)
-          (conj results
-                (let [orth (.surface node)
-                      morpheme (->> (.feature node)
-                                    csv/read-csv
-                                    first
-                                    (zipmap *features*))]
-                  (-> morpheme
-                      (assoc :mecab.features/orth orth)
-                      (update-in [:mecab.features/lemma] #(or % orth))
-                      (update-in [:mecab.features/orth-base] #(or % orth)))))))))))
+    (pop                                                    ; Discards EOS
+      (loop [node (-> lattice (.bosNode) (.next))
+             results []]
+        (if-not node
+          (do (.destroy lattice)                            ; Prevent memory from leaking.
+              results)
+          (recur
+            (.next node)
+            (conj results
+                  (let [orth (.surface node)
+                        morpheme (->> (.feature node)
+                                      csv/read-csv
+                                      first
+                                      (zipmap *features*))]
+                    (-> morpheme
+                        (assoc :mecab.features/orth orth)
+                        (update-in [:mecab.features/lemma] #(or % orth))
+                        (update-in [:mecab.features/orth-base] #(or % orth)))))))))))
 
 (s/fdef ::parse-sentence
   :args (s/cat :s string?)
