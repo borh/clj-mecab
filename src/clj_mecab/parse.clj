@@ -10,7 +10,7 @@
 ;; ## Dictionary auto-detection
 
 (s/def :mecab/dictionary
-  #{:ipadic :jumandic :unidic :unidic-neologd :unidic-cwj :unidic-csj :unidic-kindai
+  #{:ipadic :juman :unidic :unidic-neologd :unidic-cwj :unidic-csj :unidic-kindai
     :unidic-kyogen :unidic-kinsei :unidic-qkana :unidic-wakan :unidic-wabun :unidic-manyo})
 (s/def :dictionary/dir (s/and string? #(.exists (io/file %))))
 (s/def :dictionary/default :mecab/dictionary)
