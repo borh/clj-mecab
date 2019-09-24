@@ -111,7 +111,7 @@
 
 ;; ## Tagger wrappers
 
-;; Bind initial values for tagger and features to a random found dictionary type.
+;; Bind initial values for tagger and features to a found dictionary type.
 (def ^:dynamic *tagger*
   (StandardTagger. (if (-> dictionaries-info :dictionaries/dirs seq)
                      (str "-d " (get-in dictionaries-info
