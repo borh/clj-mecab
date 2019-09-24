@@ -38,22 +38,24 @@
     :unidic))
 
 (def dictionaries-info
-  (s/conform
-    :dictionaries/info
-    (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
-                             :out
-                             string/trim-newline)
-          user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
-          user-dic-dir (if (.exists (io/file user-config))
-                         (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+/") first second))
-          dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
-                    user-dic-dir
-                    system-dic-dir)
-          dics (seq (.list (io/file dic-dir)))]
-      {:dictionary/default :unidic-cwj
-       :dictionaries/path  dic-dir
-       :dictionaries/dirs  (zipmap (map (comp keyword guess-dictionary) dics)
-                                   (map #(str (io/file dic-dir %)) dics))})))
+  (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
+                           :out
+                           string/trim-newline)
+        user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
+        user-dic-dir (if (.exists (io/file user-config))
+                       (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+/?") first second))
+        dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
+                  user-dic-dir
+                  system-dic-dir)
+        dics (seq (.list (io/file dic-dir)))
+        info-map {:dictionary/default :unidic-cwj
+                  :dictionaries/path  dic-dir
+                  :dictionaries/dirs  (zipmap (map (comp keyword guess-dictionary) dics)
+                                              (map #(str (io/file dic-dir %)) dics))}
+        conformed-info-map (s/conform :dictionaries/info info-map)]
+    (when (= ::s/invalid conformed-info-map)
+      (throw (Exception. (str "Dictionary information parse error: " (s/explain-data :dictionaries/info info-map)))))
+    conformed-info-map))
 
 (def valid-dictionaries
   (set (keys (:dictionaries/dirs dictionaries-info))))
