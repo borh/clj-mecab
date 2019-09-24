@@ -120,6 +120,6 @@ Several features are planned for future versions:
 
 ## License
 
-Copyright © 2013-2018 Bor Hodošček
+Copyright © 2013-2019 Bor Hodošček
 
 Distributed under the Eclipse Public License, the same as Clojure, as well as the 3-clause BSD license.
