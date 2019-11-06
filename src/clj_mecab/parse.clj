@@ -37,13 +37,18 @@
     ;; Fallback to UniDic if not autodetected, though this might be wrong.
     :unidic))
 
+(defn extract-dictionary-dir [s]
+  (->> s (re-seq #"dicdir = (.*)/[^/]+/?") first second))
 (def dictionaries-info
   (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
                            :out
                            string/trim-newline)
+        system-dic-dir (if (.exists (io/file system-dic-dir))
+                         system-dic-dir
+                         (->> "/etc/mecabrc" slurp extract-dictionary-dir))
         user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
         user-dic-dir (if (.exists (io/file user-config))
-                       (->> user-config slurp (re-seq #"dicdir = (.*)/[^/]+/?") first second))
+                       (->> user-config slurp extract-dictionary-dir))
         dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
                   user-dic-dir
                   system-dic-dir)
@@ -93,8 +98,8 @@
 
 (s/def :mecab/morpheme
   (s/keys
-    :req [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/orth :mecab.features/orth-base :mecab.features/pron]
-    :opt [:mecab.features/l-form :mecab.features/lemma :mecab.features/kana :mecab.features/goshu :mecab.features/pron-base :mecab.features/kana-base :mecab.features/form :mecab.features/form-base :mecab.features/i-type :mecab.features/i-form :mecab.features/i-con-type :mecab.features/f-type :mecab.features/f-form :mecab.features/f-con-type :mecab.features/type :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type :mecab.features/lid :mecab.features/lemma-id :mecab.features/position]))
+    :req [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/orth :mecab.features/orth-base]
+    :opt [:mecab.features/pron :mecab.features/l-form :mecab.features/lemma :mecab.features/kana :mecab.features/goshu :mecab.features/pron-base :mecab.features/kana-base :mecab.features/form :mecab.features/form-base :mecab.features/i-type :mecab.features/i-form :mecab.features/i-con-type :mecab.features/f-type :mecab.features/f-form :mecab.features/f-con-type :mecab.features/type :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type :mecab.features/lid :mecab.features/lemma-id :mecab.features/position]))
 
 (let [ipadic-features [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/orth-base :mecab.features/kana :mecab.features/pron]
       unidic-21-features [:mecab.features/pos-1 :mecab.features/pos-2 :mecab.features/pos-3 :mecab.features/pos-4 :mecab.features/c-type :mecab.features/c-form :mecab.features/l-form :mecab.features/lemma :mecab.features/orth :mecab.features/pron :mecab.features/kana :mecab.features/goshu :mecab.features/orth-base :mecab.features/pron-base :mecab.features/kana-base :mecab.features/form-base :mecab.features/i-type :mecab.features/i-form :mecab.features/i-con-type :mecab.features/f-type :mecab.features/f-form :mecab.features/f-con-type :mecab.features/a-type :mecab.features/a-con-type :mecab.features/a-mod-type]
@@ -183,6 +188,6 @@
                         (update-in [:mecab.features/lemma] #(or % orth))
                         (update-in [:mecab.features/orth-base] #(or % orth)))))))))))
 
-(s/fdef ::parse-sentence
+(s/fdef parse-sentence
   :args (s/cat :s string?)
   :ret (s/coll-of :mecab/morpheme))

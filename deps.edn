@@ -3,4 +3,6 @@
            net.moraleboost.cmecab-java/cmecab-java {:mvn/version "2.1.0"}}
  :paths ["src"]
  :aliases {:test {:extra-paths ["test"]
-                  :extra-deps  {org.clojure/test.check {:mvn/version "RELEASE"}}}}}
+                  :extra-deps  {expound                {:mvn/version "0.7.2"}
+                                orchestra              {:mvn/version "2019.02.17-SNAPSHOT"}
+                                org.clojure/test.check {:mvn/version "0.10.0"}}}}}
