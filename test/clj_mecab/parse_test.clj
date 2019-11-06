@@ -12,7 +12,8 @@
 
 (deftest parse-sentence-unidic-test
   (testing "Parsing with UniDic."
-    (is (= (with-dictionary :unidic-cwj (parse-sentence "解析する"))
+    (is (= (with-dictionary (if (-> dictionaries-info :dictionaries/dirs :unidic-cwj) :unidic-cwj :unidic)
+                            (parse-sentence "解析する"))
            [#:mecab.features{:orth       "解析"
                              :f-type     "*"
                              :i-type     "*"
@@ -74,7 +75,8 @@
 
 (deftest parse-sentence-ipadic-test
   (testing "Parsing with IPAdic."
-    (is (= (with-dictionary :ipadic (parse-sentence "解析する"))
+    (is (= (with-dictionary (if (-> dictionaries-info :dictionaries/dirs :ipadic-utf8) :ipadic-utf8 :ipadic)
+                            (parse-sentence "解析する"))
            [#:mecab.features{:orth      "解析"
                              :c-form    "*"
                              :pos-1     "名詞"
@@ -99,6 +101,7 @@
                              :c-type    "サ変・スル"}]))))
 
 (deftest spec-test
-  (testing "Sentence parsing spec including OOV."
-    (is (s/valid? (s/coll-of :mecab/morpheme)
-                  (parse-sentence "解析する❥．")))))
+  (testing "Sentence parsing spec including OOV for all dictionaries"
+    (doseq [dic (keys (:dictionaries/dirs dictionaries-info))]
+      (is (s/valid? (s/coll-of :mecab/morpheme)
+                    (with-dictionary dic (parse-sentence "解析する❥．")))))))
