@@ -38,7 +38,7 @@
     :unidic))
 
 (defn extract-dictionary-dir [s]
-  (->> s (re-seq #"^dicdir = (.*)/[^/]+/?") first second))
+  (->> s (re-seq #"dicdir = (.*)/[^/]+/?") first second))
 
 (def dictionaries-info
   (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
