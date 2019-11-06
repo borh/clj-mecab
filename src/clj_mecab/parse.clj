@@ -38,12 +38,13 @@
     :unidic))
 
 (defn extract-dictionary-dir [s]
-  (->> s (re-seq #"dicdir = (.*)/[^/]+/?") first second))
+  (->> s (re-seq #"^dicdir = (.*)/[^/]+/?") first second))
+
 (def dictionaries-info
   (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
                            :out
                            string/trim-newline)
-        system-dic-dir (if (.exists (io/file system-dic-dir))
+        system-dic-dir (if (.isDirectory (io/file system-dic-dir))
                          system-dic-dir
                          (->> "/etc/mecabrc" slurp extract-dictionary-dir))
         user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
