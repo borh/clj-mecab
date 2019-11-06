@@ -40,16 +40,20 @@
 (defn extract-dictionary-dir [s]
   (->> s (re-seq #"dicdir = (.*)/[^/]+/?") first second))
 
+(defn canonicalize-path [s]
+  (.toString (.getAbsoluteFile (io/file s))))
+
 (def dictionaries-info
   (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
                            :out
-                           string/trim-newline)
+                           string/trim-newline
+                           canonicalize-path)
         system-dic-dir (if (.isDirectory (io/file system-dic-dir))
                          system-dic-dir
                          (->> "/etc/mecabrc" slurp extract-dictionary-dir))
         user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
         user-dic-dir (if (.exists (io/file user-config))
-                       (->> user-config slurp extract-dictionary-dir))
+                       (->> user-config slurp extract-dictionary-dir canonicalize-path))
         dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
                   user-dic-dir
                   system-dic-dir)
