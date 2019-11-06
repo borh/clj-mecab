@@ -1,6 +1,6 @@
 {:pom       {:group-id    "clj-mecab"
              :artifact-id "clj-mecab"
-             :version     "0.4.25"
+             :version     "0.4.26"
              :name        "Clojure MeCab wrapper library"}
  :packaging {:jar {:enabled           true
                    :remote-repository {:id "clojars" :url "https://clojars.org/repo"}}}
