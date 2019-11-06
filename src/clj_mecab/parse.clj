@@ -5,7 +5,8 @@
             [clojure.java.shell :as shell]
             [clojure.data.csv :as csv])
   (:import [net.moraleboost.mecab Lattice Node]
-           [net.moraleboost.mecab.impl StandardTagger]))
+           [net.moraleboost.mecab.impl StandardTagger]
+           [java.nio.file NoSuchFileException LinkOption]))
 
 ;; ## Dictionary auto-detection
 
@@ -40,8 +41,15 @@
 (defn extract-dictionary-dir [s]
   (->> s (re-seq #"dicdir = (.*)/[^/]+/?") first second))
 
-(defn canonicalize-path [s]
-  (.toString (.getAbsoluteFile (io/file s))))
+(defn extract-default-dic [s]
+  (->> s (re-seq #"dicdir = (.*)/?") first second))
+
+(defn canonicalize-path
+  "Returns string of path will all symbolic links resolved."
+  [s]
+  (try
+    (-> s io/file .toPath (.toRealPath (make-array LinkOption 0)) .toString)
+    (catch NoSuchFileException _ nil)))
 
 (def dictionaries-info
   (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
@@ -54,14 +62,21 @@
         user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
         user-dic-dir (if (.exists (io/file user-config))
                        (->> user-config slurp extract-dictionary-dir canonicalize-path))
-        dic-dir (if (and user-dic-dir (.exists (io/file user-dic-dir)))
+        dic-dir (if (and user-dic-dir (.isDirectory (io/file user-dic-dir)))
                   user-dic-dir
                   system-dic-dir)
         dics (seq (.list (io/file dic-dir)))
+        default-dic (-> "/etc/mecabrc" slurp extract-default-dic canonicalize-path)
         info-map {:dictionary/default :unidic-cwj
                   :dictionaries/path  dic-dir
                   :dictionaries/dirs  (zipmap (map (comp keyword guess-dictionary) dics)
-                                              (map #(str (io/file dic-dir %)) dics))}
+                                              (map #(canonicalize-path (str (io/file dic-dir %))) dics))}
+        info-map (if default-dic
+                   (let [dic-name (guess-dictionary default-dic)]
+                     (-> info-map
+                         (assoc :dictionary/default dic-name)
+                         (assoc-in [:dictionaries/dirs dic-name] default-dic)))
+                   info-map)
         conformed-info-map (s/conform :dictionaries/info info-map)]
     (when (= ::s/invalid conformed-info-map)
       (throw (Exception. (str "Dictionary information parse error: " (s/explain-data :dictionaries/info info-map)))))
