@@ -61,7 +61,9 @@
         conformed-info-map (s/conform :dictionaries/info info-map)]
     (when (= ::s/invalid conformed-info-map)
       (throw (Exception. (str "Dictionary information parse error: " (s/explain-data :dictionaries/info info-map)))))
-    conformed-info-map))
+    (if (not (contains? (:dictionaries/dirs conformed-info-map) :unidic-cwj))
+      (assoc conformed-info-map :dictionary/default :unidic)
+      conformed-info-map)))
 
 (def valid-dictionaries
   (set (keys (:dictionaries/dirs dictionaries-info))))
