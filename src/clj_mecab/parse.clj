@@ -56,9 +56,9 @@
                            :out
                            string/trim-newline
                            canonicalize-path)
-        system-dic-dir (if (.isDirectory (io/file system-dic-dir))
+        system-dic-dir (if (and system-dic-dir (.isDirectory (io/file system-dic-dir)))
                          system-dic-dir
-                         (->> "/etc/mecabrc" slurp extract-dictionary-dir))
+                         (->> "/etc/mecabrc" slurp extract-dictionary-dir canonicalize-path))
         user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
         user-dic-dir (if (.exists (io/file user-config))
                        (->> user-config slurp extract-dictionary-dir canonicalize-path))
