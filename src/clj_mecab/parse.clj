@@ -54,7 +54,8 @@
     (if (clojure.set/superset? (into #{} (.list (io/file s)))
                                #{"char.bin" "matrix.bin" "sys.dic" "unk.dic" "dicrc"})
       s
-      (println s " is not a valid MeCab dictionary, ignoring."))))
+      (println (format "'%s' is not a valid MeCab dictionary of type '%s', ignoring."
+                       s (guess-dictionary s))))))
 
 (defn extract-dictionaries-dir [s]
   (if s
@@ -89,11 +90,12 @@
 
         valid-dics (reduce
                      (fn [a dir]
-                       (let [c-dir (validate-dic (canonicalize-path dir))]
+                       (if-let [c-dir (validate-dic (canonicalize-path dir))]
                          (if (.isDirectory (io/file c-dir))
                            (let [dic-name (guess-dictionary c-dir)]
                              (assoc a dic-name c-dir))
-                           a)))
+                           a)
+                         a))
                      {}
                      (mapcat (fn [dir] (seq (.listFiles (io/file dir))))
                              valid-dic-dirs))
