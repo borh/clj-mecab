@@ -49,40 +49,47 @@
     (-> s io/file .toPath (.toRealPath (make-array LinkOption 0)) .toString)
     (catch NoSuchFileException _ nil)))
 
-(defn extract-dictionary-dir [s]
+(defn validate-dic [s]
+  (if s
+    (if (clojure.set/superset? (into #{} (.list (io/file s)))
+                               #{"char.bin" "matrix.bin" "sys.dic" "unk.dic" "dicrc"})
+      s
+      (println s " is not a valid MeCab dictionary, ignoring."))))
+
+(defn extract-dictionaries-dir [s]
   (if s
     (->> s (re-seq #"dicdir = (.*)/[^/]+/?") first second canonicalize-path)))
 
 (defn extract-default-dic [s]
   (if s
-    (->> s (re-seq #"dicdir = (.*)/?") first second canonicalize-path)))
+    (->> s (re-seq #"dicdir = (.*)/?") first second canonicalize-path validate-dic)))
 
 (defn slurp-if-exists [^File s]
   (if (and (.exists s) (not (.isDirectory s)))
     (slurp s)))
 
 (def dictionaries-info
-  (let [binary-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
-                           :out
-                           string/trim-newline
-                           canonicalize-path)
+  (let [binary-dics-dir (-> (shell/sh "mecab-config" "--dicdir")
+                            :out
+                            string/trim-newline
+                            canonicalize-path)
         system-config (slurp-if-exists (io/file "/etc/mecabrc"))
-        system-dic-dir (extract-dictionary-dir system-config)
+        system-dics-dir (extract-dictionaries-dir system-config)
         system-dic (extract-default-dic system-config)
         system-dic-type (guess-dictionary system-dic)
         user-config (-> (System/getProperty "user.home") (io/file ".mecabrc") slurp-if-exists)
-        user-dic-dir (extract-dictionary-dir user-config)
+        user-dics-dir (extract-dictionaries-dir user-config)
         user-dic (extract-default-dic user-config)
         user-dic-type (guess-dictionary user-dic)
 
         valid-dic-dirs (cond-> []
-                               (and binary-dic-dir (.isDirectory (io/file binary-dic-dir))) (conj binary-dic-dir)
-                               (and system-dic-dir (.isDirectory (io/file system-dic-dir))) (conj system-dic-dir)
-                               (and user-dic-dir (.isDirectory (io/file user-dic-dir))) (conj user-dic-dir))
+                               (and binary-dics-dir (.isDirectory (io/file binary-dics-dir))) (conj binary-dics-dir)
+                               (and system-dics-dir (.isDirectory (io/file system-dics-dir))) (conj system-dics-dir)
+                               (and user-dics-dir (.isDirectory (io/file user-dics-dir))) (conj user-dics-dir))
 
         valid-dics (reduce
                      (fn [a dir]
-                       (let [c-dir (canonicalize-path dir)]
+                       (let [c-dir (validate-dic (canonicalize-path dir))]
                          (if (.isDirectory (io/file c-dir))
                            (let [dic-name (guess-dictionary c-dir)]
                              (assoc a dic-name c-dir))
@@ -98,7 +105,7 @@
                             (ffirst valid-dics)))]
     {:dictionary/default preferred-dic
      :dictionaries/paths valid-dic-dirs
-     :dictionaries/dirs valid-dics}))
+     :dictionaries/dirs  valid-dics}))
 
 (def valid-dictionaries
   (set (keys (:dictionaries/dirs dictionaries-info))))
