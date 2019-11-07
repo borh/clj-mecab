@@ -6,7 +6,8 @@
             [clojure.data.csv :as csv])
   (:import [net.moraleboost.mecab Lattice Node]
            [net.moraleboost.mecab.impl StandardTagger]
-           [java.nio.file NoSuchFileException LinkOption]))
+           [java.nio.file NoSuchFileException LinkOption]
+           [java.io File]))
 
 ;; ## Dictionary auto-detection
 
@@ -21,28 +22,25 @@
   (s/keys :req [:dictionaries/path :dictionary/default :dictionaries/dirs]))
 
 (defn guess-dictionary [s]
-  (condp re-seq s
-    #"(?i)ipadic" :ipadic
-    #"(?i)juman" :juman
-    #"(?i)unidic.*neologd.*" :unidic-neologd
-    #"(?i)(MLJ|kindai)" :unidic-kindai
-    #"(?i)(EMJ|kinsei)" :unidic-kinsei
-    #"(?i)unidic.*cwj" :unidic-cwj
-    #"(?i)unidic.*csj" :unidic-csj
-    #"(?i)unidic.*kyogen" :unidic-kyogen
-    #"(?i)unidic.*qkana" :unidic-qkana
-    #"(?i)unidic.*wakan" :unidic-wakan
-    #"(?i)unidic.*wabun" :unidic-wabun
-    #"(?i)unidic.*manyo" :unidic-manyo
-    #"(?i)unidic" :unidic
-    ;; Fallback to UniDic if not autodetected, though this might be wrong.
-    :unidic))
-
-(defn extract-dictionary-dir [s]
-  (->> s (re-seq #"dicdir = (.*)/[^/]+/?") first second))
-
-(defn extract-default-dic [s]
-  (->> s (re-seq #"dicdir = (.*)/?") first second))
+  (if s
+    (condp re-seq s
+      #"(?i)ipadic" :ipadic
+      #"(?i)juman" :juman
+      #"(?i)unidic.*neologd.*" :unidic-neologd
+      #"(?i)(MLJ|kindai)" :unidic-kindai
+      #"(?i)(EMJ|kinsei)" :unidic-kinsei
+      #"(?i)unidic.*cwj" :unidic-cwj
+      #"(?i)unidic.*csj" :unidic-csj
+      #"(?i)unidic.*kyogen" :unidic-kyogen
+      #"(?i)unidic.*qkana" :unidic-qkana
+      #"(?i)unidic.*wakan" :unidic-wakan
+      #"(?i)unidic.*wabun" :unidic-wabun
+      #"(?i)unidic.*manyo" :unidic-manyo
+      #"(?i)unidic" :unidic
+      ;; Fallback to UniDic if not autodetected, though this might be wrong.
+      ;; In particular, Debian uses the 'default' directory.
+      #"(?i)debian" :unidic
+      :unidic)))
 
 (defn canonicalize-path
   "Returns string of path will all symbolic links resolved."
@@ -51,38 +49,56 @@
     (-> s io/file .toPath (.toRealPath (make-array LinkOption 0)) .toString)
     (catch NoSuchFileException _ nil)))
 
+(defn extract-dictionary-dir [s]
+  (if s
+    (->> s (re-seq #"dicdir = (.*)/[^/]+/?") first second canonicalize-path)))
+
+(defn extract-default-dic [s]
+  (if s
+    (->> s (re-seq #"dicdir = (.*)/?") first second canonicalize-path)))
+
+(defn slurp-if-exists [^File s]
+  (if (and (.exists s) (not (.isDirectory s)))
+    (slurp s)))
+
 (def dictionaries-info
-  (let [system-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
+  (let [binary-dic-dir (-> (shell/sh "mecab-config" "--dicdir")
                            :out
                            string/trim-newline
                            canonicalize-path)
-        system-dic-dir (if (and system-dic-dir (.isDirectory (io/file system-dic-dir)))
-                         system-dic-dir
-                         (->> "/etc/mecabrc" slurp extract-dictionary-dir canonicalize-path))
-        user-config (str (io/file (System/getProperty "user.home") ".mecabrc"))
-        user-dic-dir (if (.exists (io/file user-config))
-                       (->> user-config slurp extract-dictionary-dir canonicalize-path))
-        dic-dir (if (and user-dic-dir (.isDirectory (io/file user-dic-dir)))
-                  user-dic-dir
-                  system-dic-dir)
-        dics (seq (.list (io/file dic-dir)))
-        default-dic (-> "/etc/mecabrc" slurp extract-default-dic canonicalize-path)
-        info-map {:dictionary/default :unidic-cwj
-                  :dictionaries/path  dic-dir
-                  :dictionaries/dirs  (zipmap (map (comp keyword guess-dictionary) dics)
-                                              (map #(canonicalize-path (str (io/file dic-dir %))) dics))}
-        info-map (if default-dic
-                   (let [dic-name (guess-dictionary default-dic)]
-                     (-> info-map
-                         (assoc :dictionary/default dic-name)
-                         (assoc-in [:dictionaries/dirs dic-name] default-dic)))
-                   info-map)
-        conformed-info-map (s/conform :dictionaries/info info-map)]
-    (when (= ::s/invalid conformed-info-map)
-      (throw (Exception. (str "Dictionary information parse error: " (s/explain-data :dictionaries/info info-map)))))
-    (if (not (contains? (:dictionaries/dirs conformed-info-map) :unidic-cwj))
-      (assoc conformed-info-map :dictionary/default :unidic)
-      conformed-info-map)))
+        system-config (slurp-if-exists (io/file "/etc/mecabrc"))
+        system-dic-dir (extract-dictionary-dir system-config)
+        system-dic (extract-default-dic system-config)
+        system-dic-type (guess-dictionary system-dic)
+        user-config (-> (System/getProperty "user.home") (io/file ".mecabrc") slurp-if-exists)
+        user-dic-dir (extract-dictionary-dir user-config)
+        user-dic (extract-default-dic user-config)
+        user-dic-type (guess-dictionary user-dic)
+
+        valid-dic-dirs (cond-> []
+                               (and binary-dic-dir (.isDirectory (io/file binary-dic-dir))) (conj binary-dic-dir)
+                               (and system-dic-dir (.isDirectory (io/file system-dic-dir))) (conj system-dic-dir)
+                               (and user-dic-dir (.isDirectory (io/file user-dic-dir))) (conj user-dic-dir))
+
+        valid-dics (reduce
+                     (fn [a dir]
+                       (let [c-dir (canonicalize-path dir)]
+                         (if (.isDirectory (io/file c-dir))
+                           (let [dic-name (guess-dictionary c-dir)]
+                             (assoc a dic-name c-dir))
+                           a)))
+                     {}
+                     (mapcat (fn [dir] (seq (.listFiles (io/file dir))))
+                             valid-dic-dirs))
+
+        preferred-dic (condp get valid-dics
+                        user-dic-type :>> user-dic-type
+                        system-dic-type :>> system-dic-type
+                        (or (some #(if (% valid-dics) %) [:unidic-cwj :unidic :unidic-csj :ipadic-utf8 :ipadic])
+                            (ffirst valid-dics)))]
+    {:dictionary/default preferred-dic
+     :dictionaries/paths valid-dic-dirs
+     :dictionaries/dirs valid-dics}))
 
 (def valid-dictionaries
   (set (keys (:dictionaries/dirs dictionaries-info))))
