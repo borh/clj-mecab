@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-G=$(ls src)
+G=$(ls src|sed "s/_/-/g")
 A=$(basename $PWD)
 V=$(git tag|tail -1|tr -d v) 
 
