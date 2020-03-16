@@ -79,24 +79,14 @@ And at least one dictionary:
 -   UniDic:
 
     ```bash
-    curl -O http://unidic.ninjal.ac.jp/dictionaries/UniDic-gendai/stable/zip/unidic-cwj-2.2.0.zip
-    unzip -x unidic-cwj-2.2.0.zip
-    cd unidic-cwj-2.2.0 && install -d $(mecab-config --dicdir)/unidic-cwj && install -m 644 dicrc *.bin *.dic $(mecab-config --dicdir)/unidic-cwj && cd ..
+    curl -O https://unidic.ninjal.ac.jp/unidic_archive/cwj/2.3.0/unidic-cwj-2.3.0.zip
+    unzip -x unidic-cwj-2.3.0.zip
+    cd unidic-cwj-2.3.0 && install -d $(mecab-config --dicdir)/unidic-cwj && install -m 644 dicrc *.bin *.dic $(mecab-config --dicdir)/unidic-cwj && cd ..
     ```
-
-## Leiningen Dependency
-
-Include in :dependencies in your `project.clj`:
-
-```clojure
-[clj-mecab "0.4.12"]
-```
 
 ## Usage
 
 Interactive use:
-
-`$ boot repl`
 
 ```clojure
 (require '[clj-mecab.parse :as mecab])
@@ -104,12 +94,6 @@ Interactive use:
 
 [{:orth "こんにちは", :f-type "*", :i-type "*", ...} {:orth "、", :f-type "*", :i-type "*", ...} {:orth "世界", :f-type "*", :i-type "*", ...} ...]
 ```
-
-## Roadmap
-
-Several features are planned for future versions:
-
--   Better examples
 
 ## BUGS
 
@@ -120,6 +104,6 @@ Several features are planned for future versions:
 
 ## License
 
-Copyright © 2013-2019 Bor Hodošček
+Copyright © 2013-2020 Bor Hodošček
 
 Distributed under the Eclipse Public License, the same as Clojure, as well as the 3-clause BSD license.
