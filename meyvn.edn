@@ -3,5 +3,5 @@
              :version     "1.0.0"
              :name        "Clojure MeCab wrapper library"}
  :packaging {:jar {:enabled           true
-                   :remote-repository {:id "clojars" :url "https://clojars.org/clj-mecab/clj-mecab"}}}
+                   :remote-repository {:id "clojars" :url "https://clojars.org/clj-mecab"}}}
  :scm       {:enabled true}}

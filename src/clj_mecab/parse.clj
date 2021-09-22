@@ -1,6 +1,7 @@
 (ns clj-mecab.parse
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
+            [clojure.set]
             [clojure.java.io :as io]
             [clojure.java.shell :as shell]
             [clojure.data.csv :as csv])
